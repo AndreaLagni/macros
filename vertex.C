@@ -1173,7 +1173,7 @@ void vertex(){
 				Double_t CALIFA_IDtoZ[2432];
 
 				//Load CALIFA Map
-				ifstream infile("/feynman/home/dphn/lena/al268379/work/s522/foot/vertex/CALIFA_Mapping.dat");
+				ifstream infile("CALIFA_Mapping.dat");
 				Int_t a;
 				Double_t b, c, d;
 
