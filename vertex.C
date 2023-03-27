@@ -160,7 +160,7 @@ void vertex(){
 	timer.Start();
 	Hist();
 
-	TFile*in =  new TFile("../unpacked/131_mdf.root","READ");    	
+	TFile*in =  new TFile("../unpacked/131_mdf_0001.root","READ");    	
 
 	if(in){std::cout<<"File Found" << std::endl;} 
 	if(!in){std::cout<<"File Not Found" << std::endl;} 
@@ -406,8 +406,10 @@ void vertex(){
 	int Mult3t=0;
 	int Mult4t=0;
 	int Det_Id=0;
-	int Bar_Id=0;	
-	int Califa_mult;      
+	int Bar_Id=0;
+	double EH=0;	
+	int Califa_mult;     
+	vector <double> ts;	
 	vector <double> Et0;
 	vector <double> Zt0;
 	vector <double> xt0;
@@ -659,7 +661,7 @@ void vertex(){
 	Int_t TPATn;
 
 	//New File definition
-	TFile *q = new TFile("test4_energy_complanar.root","RECREATE");
+	TFile *q = new TFile("vertex_0001.root","RECREATE");
 	TTree *vertex = new TTree ("vertex","vertex"); 
 
 	vertex->Branch("FRS_Aq",&frs_aq);
@@ -726,7 +728,7 @@ void vertex(){
 	vertex->Branch("Pxf",&Pmxf);
 	vertex->Branch("Pyf",&Pmyf);
 	vertex->Branch("Pzf",&Pmzf);
-	
+	vertex->Branch("TimeStamp",&ts);
 	//nevents=100000;
 
 	for(int i = 0; i<nevents ; i++){
@@ -976,7 +978,8 @@ void vertex(){
 		p2pt = (TRIG(4)) & DataCA->GetTpat();
 		t1 = (TRIG(1)) & DataCA->GetTpat();
 		TPAT = DataCA->GetTpat();
-
+		EH = DATACA->GetTimeStamp();
+		ts.push_back(EH);
 		R3BFrsData**frsData = new R3BFrsData*[frsHitsPerEvent];
 		R3BCalifaClusterData** califaData = new R3BCalifaClusterData*[CalifaHitsPerEvent];
 		R3BMwpcHitData** mwpc0Data = new R3BMwpcHitData*[mwpc0HitsPerEvent];
@@ -1173,7 +1176,7 @@ void vertex(){
 				Double_t CALIFA_IDtoZ[2432];
 
 				//Load CALIFA Map
-				ifstream infile("CALIFA_Mapping.dat");
+				ifstream infile("/feynman/home/dphn/lena/al268379/work/s522/foot/vertex/CALIFA_Mapping.dat");
 				Int_t a;
 				Double_t b, c, d;
 
@@ -1365,35 +1368,35 @@ void vertex(){
 													if(aX_right>0.255 && aX_right<1.57){	
 														AX_right.push_back(aX_right);
 														BX_right.push_back(bX_right);
-															theta_p_r.push_back(theta_ra);
-															phi_p_r.push_back(phi_ra);
-															Foot6_Z = (bX_right-fBDet[5])/(fADet[5]-aX_right);
-															Foot13_Z = (bX_right-fBDet[12])/(fADet[12]-aX_right);
-															if((Foot6_Z>474.6 && Foot6_Z<571.6) && (Foot13_Z<533.4 && Foot13_Z>454.9) && aX_right>0){
-																zt5.push_back(Foot6_Z);
-																zt12.push_back(Foot13_Z);	
-																aY_right = (yt5.at(r)-yt12.at(h))/( Foot6_Z - Foot13_Z);
-																bY_right = (yt12.at(h)+sy)-aY_right*Foot13_Z;
-																//Insert condition aY!
-																//if(abs(aY_right)<0.69){
-																	AY_right.push_back(aY_right);
-																	BY_right.push_back(bY_right);
-																	xr10=aX_right*400+bX_right;
-																	xr3=aX_right*600+bX_right;	
-																	TLine *l_r=new TLine (400,xr10,600,xr3);
+														theta_p_r.push_back(theta_ra);
+														phi_p_r.push_back(phi_ra);
+														Foot6_Z = (bX_right-fBDet[5])/(fADet[5]-aX_right);
+														Foot13_Z = (bX_right-fBDet[12])/(fADet[12]-aX_right);
+														if((Foot6_Z>474.6 && Foot6_Z<571.6) && (Foot13_Z<533.4 && Foot13_Z>454.9) && aX_right>0){
+															zt5.push_back(Foot6_Z);
+															zt12.push_back(Foot13_Z);	
+															aY_right = (yt5.at(r)-yt12.at(h))/( Foot6_Z - Foot13_Z);
+															bY_right = (yt12.at(h)+sy)-aY_right*Foot13_Z;
+															//Insert condition aY!
+															//if(abs(aY_right)<0.69){
+															AY_right.push_back(aY_right);
+															BY_right.push_back(bY_right);
+															xr10=aX_right*400+bX_right;
+															xr3=aX_right*600+bX_right;	
+															TLine *l_r=new TLine (400,xr10,600,xr3);
 
-																	TVector3 Posr_1a(aX_right*Foot6_Z+bX_right,aY_right*Foot6_Z+bY_right,Foot6_Z);
-																	TVector3 Posr_2a(aX_right*Foot13_Z+bX_right,aY_right*Foot13_Z+bY_right,Foot13_Z);
-																	pra=Posr_1a-Posr_2a;
+															TVector3 Posr_1a(aX_right*Foot6_Z+bX_right,aY_right*Foot6_Z+bY_right,Foot6_Z);
+															TVector3 Posr_2a(aX_right*Foot13_Z+bX_right,aY_right*Foot13_Z+bY_right,Foot13_Z);
+															pra=Posr_1a-Posr_2a;
 
-																	//pr=Posr_1-Posr;
-																	//pl=Posl_1-Posl;       
-																	theta_ra=pra.Theta();
-																	phi_ra=pra.Phi();
-																	Count_right_y++;
-																//} phi cond
-															}//cuttr
-														}//cutcinq
+															//pr=Posr_1-Posr;
+															//pl=Posl_1-Posl;       
+															theta_ra=pra.Theta();
+															phi_ra=pra.Phi();
+															Count_right_y++;
+															//} phi cond
+														}//cuttr
+													}//cutcinq
 													//}cut_energy
 												}
 											}
@@ -1614,13 +1617,13 @@ void vertex(){
 										double phi_rt=pr.Phi();
 										double phi_lt=pl.Phi();
 
-										theta_p_r_m_t.push_back(theta_rt*TMath::RadToDeg());
-										phi_p_r_m_t.push_back(phi_rt*TMath::RadToDeg());
+										theta_p_r_m_t.push_back(theta_lt*TMath::RadToDeg());
+										phi_p_r_m_t.push_back(phi_lt*TMath::RadToDeg());
 
-										theta_p_l_m_t.push_back(theta_lt*TMath::RadToDeg());
-										phi_p_l_m_t.push_back(phi_lt*TMath::RadToDeg());
+										theta_p_l_m_t.push_back(theta_rt*TMath::RadToDeg());
+										phi_p_l_m_t.push_back(phi_rt*TMath::RadToDeg());
 										double openingAngle_ft=999.;
-										opa_foot_t = TMath::Sin(theta_rt)*TMath::Sin(theta_lt)*TMath::Cos(phi_lt-phi_rt) + TMath::Cos(theta_rt)*TMath::Cos(theta_lt);
+										opa_foot_t = TMath::Sin(theta_lt)*TMath::Sin(theta_rt)*TMath::Cos(phi_rt-phi_lt) + TMath::Cos(theta_lt)*TMath::Cos(theta_rt);
 										openingAngle_ft = TMath::RadToDeg()*TMath::ACos(opa_foot_t);
 										opa_f_t.push_back(openingAngle_ft);
 										opa_t.push_back(openingAngle_ft);
@@ -1641,13 +1644,13 @@ void vertex(){
 										double c_phi_l=c_t_l.Phi();
 										double c_theta_r=c_t_r.Theta();
 										double c_phi_r=c_t_r.Phi();
-										double rec_leftf = recon(El/1000.,theta_lt)/1000.;
+										double rec_leftf = recon(El/1000.,theta_rt)/1000.;
 										double rec_rightf = recon(Er/1000.,theta_rt)/1000.;
 										double p3_magf = TMath::Sqrt(pow(rec_leftf+mp,2)-pow(mp,2));
 										double p4_magf = TMath::Sqrt(pow(rec_rightf+mp,2)-pow(mp,2));
 										TVector3 P3f,P4f;
-										P3f.SetMagThetaPhi(p3_magf,theta_lt,phi_lt);
-										P4f.SetMagThetaPhi(p4_magf,theta_rt,phi_rt);
+										P3f.SetMagThetaPhi(p3_magf,theta_rt,phi_rt);
+										P4f.SetMagThetaPhi(p4_magf,theta_lt,phi_lt);
 										p3f.SetVectM(P3f,mp);
 										p4f.SetVectM(P4f,mp);
 										ptg.SetXYZM(0.,0.,0.,mp);
