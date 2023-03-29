@@ -661,7 +661,7 @@ void vertex(){
 	Int_t TPATn;
 
 	//New File definition
-	TFile *q = new TFile("vertex_0001.root","RECREATE");
+	TFile *q = new TFile("vertex_0001_ts.root","RECREATE");
 	TTree *vertex = new TTree ("vertex","vertex"); 
 
 	vertex->Branch("FRS_Aq",&frs_aq);
@@ -978,7 +978,7 @@ void vertex(){
 		p2pt = (TRIG(4)) & DataCA->GetTpat();
 		t1 = (TRIG(1)) & DataCA->GetTpat();
 		TPAT = DataCA->GetTpat();
-		EH = DATACA->GetTimeStamp();
+		EH = DataCA->GetTimeStamp();
 		ts.push_back(EH);
 		R3BFrsData**frsData = new R3BFrsData*[frsHitsPerEvent];
 		R3BCalifaClusterData** califaData = new R3BCalifaClusterData*[CalifaHitsPerEvent];
