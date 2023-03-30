@@ -944,7 +944,7 @@ void vertex(){
 		e2c.clear();
 		Pmt.clear();
 		Pmtf.clear();
-
+		ts.clear();
 		hitDataFRS->Clear();
 		hitDataMWPC0->Clear();
 		hitDataMWPC1->Clear();
