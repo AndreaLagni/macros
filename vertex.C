@@ -84,8 +84,56 @@ void Hist(){
 }
 
 
-
 double recon(Double_t dep_e, Double_t theta)
+{
+  double mp = 938.; // MeV
+  
+  TF1 *f1 = new TF1("f1","[0]/(x*x)+[1]*log(x)/(x*x)+[2]",0.65,0.95);
+  Double_t theta_deg = theta * TMath::RadToDeg();
+
+  if (theta_deg<55.5) {
+    if (dep_e <125. || dep_e > 270.)
+      return -1000.;
+    f1->SetParameter(0,-377.139);
+    f1->SetParameter(1,-677.695);
+    f1->SetParameter(2,508.23);
+    double beta = f1->GetX(dep_e);
+    if (beta <= 0. || beta >= 1.)
+        return -1000.;
+    double gamma = 1./TMath::Sqrt(1.-beta*beta);
+    double Ekin = (gamma-1) * mp;
+    return Ekin;
+  }
+  else if (theta_deg < 70.4)
+    {
+        if (dep_e <103. || dep_e > 230.)
+          return -1000.;
+        f1->SetParameter(0,-167.502);
+        f1->SetParameter(1,-343.602);
+        f1->SetParameter(2,269.559);
+        double beta = f1->GetX(dep_e);
+        if (beta <= 0. || beta >= 1.)
+            return -1000.;
+        double gamma = 1./TMath::Sqrt(1.-beta*beta);
+        double Ekin = (gamma-1) * mp;
+        return Ekin;
+    }
+  else
+    {
+        if (dep_e <97. || dep_e > 210.)
+          return -1000.;
+        f1->SetParameter(0,-132.962);
+        f1->SetParameter(1,-285.584);
+        f1->SetParameter(2,228.287);
+        double beta = f1->GetX(dep_e);
+        if (beta <= 0. || beta >= 1.)
+            return -1000.;
+        double gamma = 1./TMath::Sqrt(1.-beta*beta);
+        double Ekin = (gamma-1) * mp;
+        return Ekin;
+    }
+}
+/*double recon(Double_t dep_e, Double_t theta)
 {
 	Double_t theta_deg = theta * TMath::RadToDeg();
 	if (theta_deg<55.5) { // iphos
@@ -102,7 +150,7 @@ double recon(Double_t dep_e, Double_t theta)
 		return 3321.43 - 19.5399*dep_e - 0.19495*pow(dep_e,2) + 0.00196785*pow(dep_e,3) - 0.00000440662*pow(dep_e,4);
 	}
 }
-
+*/
 void MinDist(double ax_right, double bx_right, double ay_right, double by_right, double ax_left, double bx_left, double ay_left, double by_left, double &xv, double &yv, double &zv, double &distmin)
 {
 
@@ -160,7 +208,7 @@ void vertex(){
 	timer.Start();
 	Hist();
 
-	TFile*in =  new TFile("../unpacked/131_mdf.root","READ");    	
+	TFile*in =  new TFile("../unpacked/131_mdf_2.root","READ");    	
 
 	if(in){std::cout<<"File Found" << std::endl;} 
 	if(!in){std::cout<<"File Not Found" << std::endl;} 
@@ -406,8 +454,10 @@ void vertex(){
 	int Mult3t=0;
 	int Mult4t=0;
 	int Det_Id=0;
-	int Bar_Id=0;	
-	int Califa_mult;      
+	int Bar_Id=0;
+	double EH=0;	
+	int Califa_mult;     
+	vector <double> ts;	
 	vector <double> Et0;
 	vector <double> Zt0;
 	vector <double> xt0;
@@ -659,7 +709,7 @@ void vertex(){
 	Int_t TPATn;
 
 	//New File definition
-	TFile *q = new TFile("test4_energy_complanar.root","RECREATE");
+	TFile *q = new TFile("vertex_big_ts_strict_2.root","RECREATE");
 	TTree *vertex = new TTree ("vertex","vertex"); 
 
 	vertex->Branch("FRS_Aq",&frs_aq);
@@ -726,7 +776,7 @@ void vertex(){
 	vertex->Branch("Pxf",&Pmxf);
 	vertex->Branch("Pyf",&Pmyf);
 	vertex->Branch("Pzf",&Pmzf);
-	
+	vertex->Branch("TimeStamp",&ts);
 	//nevents=100000;
 
 	for(int i = 0; i<nevents ; i++){
@@ -871,7 +921,7 @@ void vertex(){
 		Nst8.clear();
 		Nst6.clear();
 		Nst9.clear();
-
+		ts.clear();
 		// Clear of new variables
 		phi_rv.clear();
 		phi_lv.clear();
@@ -976,7 +1026,8 @@ void vertex(){
 		p2pt = (TRIG(4)) & DataCA->GetTpat();
 		t1 = (TRIG(1)) & DataCA->GetTpat();
 		TPAT = DataCA->GetTpat();
-
+		EH = DataCA->GetTimeStamp();
+		ts.push_back(EH);
 		R3BFrsData**frsData = new R3BFrsData*[frsHitsPerEvent];
 		R3BCalifaClusterData** califaData = new R3BCalifaClusterData*[CalifaHitsPerEvent];
 		R3BMwpcHitData** mwpc0Data = new R3BMwpcHitData*[mwpc0HitsPerEvent];
@@ -1173,7 +1224,7 @@ void vertex(){
 				Double_t CALIFA_IDtoZ[2432];
 
 				//Load CALIFA Map
-				ifstream infile("CALIFA_Mapping.dat");
+				ifstream infile("/feynman/home/dphn/lena/al268379/work/s522/foot/vertex/CALIFA_Mapping.dat");
 				Int_t a;
 				Double_t b, c, d;
 
@@ -1386,38 +1437,38 @@ void vertex(){
 													//if(Et10.at(i)<15 && Et3.at(j)<15 && Et5.at(r)<25 && Et12.at(h)<25){
 													aX_right = (xt10.at(i)-xt3.at(j))/( zt10.at(i)- zt3.at(j));
 													bX_right = (xt3.at(j)+sx)-aX_right*(zt3.at(j));
-													if(aX_right>0.255 && aX_right<1.57){	
+													if(aX_right>0/*>0.255 */&& aX_right<1.57){	
 														AX_right.push_back(aX_right);
 														BX_right.push_back(bX_right);
-															theta_p_r.push_back(theta_ra);
-															phi_p_r.push_back(phi_ra);
-															Foot6_Z = (bX_right-fBDet[5])/(fADet[5]-aX_right);
-															Foot13_Z = (bX_right-fBDet[12])/(fADet[12]-aX_right);
-															if((Foot6_Z>474.6 && Foot6_Z<571.6) && (Foot13_Z<533.4 && Foot13_Z>454.9) && aX_right>0){
-																zt5.push_back(Foot6_Z);
-																zt12.push_back(Foot13_Z);	
-																aY_right = (yt5.at(r)-yt12.at(h))/( Foot6_Z - Foot13_Z);
-																bY_right = (yt12.at(h)+sy)-aY_right*Foot13_Z;
-																//Insert condition aY!
-																//if(abs(aY_right)<0.69){
-																	AY_right.push_back(aY_right);
-																	BY_right.push_back(bY_right);
-																	xr10=aX_right*400+bX_right;
-																	xr3=aX_right*600+bX_right;	
-																	TLine *l_r=new TLine (400,xr10,600,xr3);
+														theta_p_r.push_back(theta_ra);
+														phi_p_r.push_back(phi_ra);
+														Foot6_Z = (bX_right-fBDet[5])/(fADet[5]-aX_right);
+														Foot13_Z = (bX_right-fBDet[12])/(fADet[12]-aX_right);
+														if((Foot6_Z>474.6 && Foot6_Z<571.6) && (Foot13_Z<533.4 && Foot13_Z>454.9) && aX_right>0){
+															zt5.push_back(Foot6_Z);
+															zt12.push_back(Foot13_Z);	
+															aY_right = (yt5.at(r)-yt12.at(h))/( Foot6_Z - Foot13_Z);
+															bY_right = (yt12.at(h)+sy)-aY_right*Foot13_Z;
+															//Insert condition aY!
+															//if(abs(aY_right)<0.69){
+															AY_right.push_back(aY_right);
+															BY_right.push_back(bY_right);
+															xr10=aX_right*400+bX_right;
+															xr3=aX_right*600+bX_right;	
+															TLine *l_r=new TLine (400,xr10,600,xr3);
 
-																	TVector3 Posr_1a(aX_right*Foot6_Z+bX_right,aY_right*Foot6_Z+bY_right,Foot6_Z);
-																	TVector3 Posr_2a(aX_right*Foot13_Z+bX_right,aY_right*Foot13_Z+bY_right,Foot13_Z);
-																	pra=Posr_1a-Posr_2a;
+															TVector3 Posr_1a(aX_right*Foot6_Z+bX_right,aY_right*Foot6_Z+bY_right,Foot6_Z);
+															TVector3 Posr_2a(aX_right*Foot13_Z+bX_right,aY_right*Foot13_Z+bY_right,Foot13_Z);
+															pra=Posr_1a-Posr_2a;
 
-																	//pr=Posr_1-Posr;
-																	//pl=Posl_1-Posl;       
-																	theta_ra=pra.Theta();
-																	phi_ra=pra.Phi();
-																	Count_right_y++;
-																//} phi cond
-															}//cuttr
-														}//cutcinq
+															//pr=Posr_1-Posr;
+															//pl=Posl_1-Posl;       
+															theta_ra=pra.Theta();
+															phi_ra=pra.Phi();
+															Count_right_y++;
+															//} phi cond
+														}//cuttr
+													}//cutcinq
 													//}cut_energy
 												}
 											}
@@ -1452,7 +1503,7 @@ void vertex(){
 													//if(Et8.at(i)<15 && Et11.at(j)<15 && Et9.at(r)<25 && Et6.at(h)<25){
 														aX_left = (xt8.at(i)-xt11.at(j))/( zt8.at(i)- zt11.at(j));
 														bX_left = (xt11.at(j)+sx)-aX_left*(zt11.at(j));
-														if(aX_left<-0.255 && aX_left>-1.57){	
+														if(aX_left<0/*-0.255*/ && aX_left>-1.57){	
 															AX_left.push_back(aX_left);
 															BX_left.push_back(bX_left);
 															theta_p_l.push_back(theta_la);
@@ -1577,7 +1628,7 @@ void vertex(){
 									double dtheta_rn= -999.;
 
 
-									if(c_theta_ln<90 && c_theta_rn<90 && abs(c_phi_rn)>90 && abs(c_phi_ln)<90){
+									if(c_theta_ln<90 && c_theta_rn<90/* && abs(c_phi_rn)>90 && abs(c_phi_ln)<90*/){
 										//double dphi_l= phi_lt-c_phi_r;
 										//double dphi_r= phi_rt-c_phi_l;
 										//double dtheta_l=theta_lt-c_theta_l;
@@ -1592,7 +1643,7 @@ void vertex(){
 									temp_dist = dist; //+ removed
 									if(theta_l>0 && theta_r>0){
 
-										if(abs(dtheta_ln-theta_ltt)<10 && abs(dtheta_rn-theta_rtt)<10 && dist_min>temp_dist && TMath::Abs(xv)<30. && TMath::Abs(yv)<20./* xv>-20  && xv<7*/){
+										if(abs(dtheta_ln-theta_ltt)<4 && abs(dtheta_rn-theta_rtt)<4 &&  dist_min>temp_dist && TMath::Abs(xv)<30. && TMath::Abs(yv)<20./* xv>-20  && xv<7*/){
 											dist_min = temp_dist;
 											//dist_minn = dist_min;
 											p_min = p;
@@ -1610,7 +1661,7 @@ void vertex(){
 								double theta_plmt=999.;
 								double phi_prmt=999.;
 								double phi_plmt=999.;
-								if(dist_min<10){	
+								if(dist_min<1){	
 									if(AX_right.at(p_min)>0 && AX_left.at(q_min)<0){
 
 										//cout<<"---------*BINGOOO*----------"<<endl;
@@ -1639,12 +1690,12 @@ void vertex(){
 										double phi_lt=pl.Phi();
 
 										theta_p_r_m_t.push_back(theta_rt*TMath::RadToDeg());
-										phi_p_r_m_t.push_back(phi_rt*TMath::RadToDeg());
+										phi_p_r_m_t.push_back(phi_lt*TMath::RadToDeg());
 
 										theta_p_l_m_t.push_back(theta_lt*TMath::RadToDeg());
-										phi_p_l_m_t.push_back(phi_lt*TMath::RadToDeg());
+										phi_p_l_m_t.push_back(phi_rt*TMath::RadToDeg());
 										double openingAngle_ft=999.;
-										opa_foot_t = TMath::Sin(theta_rt)*TMath::Sin(theta_lt)*TMath::Cos(phi_lt-phi_rt) + TMath::Cos(theta_rt)*TMath::Cos(theta_lt);
+										opa_foot_t = TMath::Sin(theta_lt)*TMath::Sin(theta_rt)*TMath::Cos(phi_rt-phi_lt) + TMath::Cos(theta_lt)*TMath::Cos(theta_rt);
 										openingAngle_ft = TMath::RadToDeg()*TMath::ACos(opa_foot_t);
 										opa_f_t.push_back(openingAngle_ft);
 										opa_t.push_back(openingAngle_ft);
@@ -1670,8 +1721,8 @@ void vertex(){
 										double p3_magf = TMath::Sqrt(pow(rec_leftf+mp,2)-pow(mp,2));
 										double p4_magf = TMath::Sqrt(pow(rec_rightf+mp,2)-pow(mp,2));
 										TVector3 P3f,P4f;
-										P3f.SetMagThetaPhi(p3_magf,theta_lt,phi_lt);
-										P4f.SetMagThetaPhi(p4_magf,theta_rt,phi_rt);
+										P3f.SetMagThetaPhi(p3_magf,theta_lt,phi_rt);
+										P4f.SetMagThetaPhi(p4_magf,theta_rt,phi_lt);
 										p3f.SetVectM(P3f,mp);
 										p4f.SetVectM(P4f,mp);
 										ptg.SetXYZM(0.,0.,0.,mp);
