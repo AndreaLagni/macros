@@ -1243,13 +1243,37 @@ void vertex(){
 				TVector3 master_califa[2];
 				double maxE1 = 0., maxE2 = 0.;
 				int crystalhits1 = 0, crystalhits2 = 0;
-
+				
 				if(mul_cluster_califa>1 && hit_energy.size()>1 && hit_theta.size()>1 && hit_phi.size()>1){
-					maxE1 = hit_energy.at(0);
-					master_califa[0].SetMagThetaPhi(1.,hit_theta.at(0)*TMath::DegToRad(),hit_phi.at(0)*TMath::DegToRad());
-					maxE2 = hit_energy.at(1);
-					master_califa[1].SetMagThetaPhi(1.,hit_theta.at(1)*TMath::DegToRad(),hit_phi.at(1)*TMath::DegToRad());
-				}
+        
+                			//Sort hits from higher to lower Energy                 
+                        		for(Int_t j = 0; j < mul_cluster_califa-1 ; j++){
+                                		for(Int_t k = j+1; k < mul_cluster_califa ; k++){
+                                        		if(hit_energy.at(j)<hit_energy.at(k)){
+
+                                                		Int_t temp1 = hit_energy.at(j);
+                                                		hit_energy.at(j) = hit_energy.at(k);
+                                                		hit_energy.at(k) = temp1;
+
+                                                		Double_t temp2 = hit_theta.at(j);
+                                                		hit_theta.at(j) = hit_theta.at(k);
+                                                		hit_theta.at(k) = temp2;
+
+                                                		Double_t temp3 = hit_phi.at(j);
+                                                		hit_phi.at(j) = hit_phi.at(k);
+                                                		hit_phi.at(k) = temp3;
+                                        		}
+                                		}
+                        		}
+
+
+
+
+          				maxE1 = hit_energy.at(0);
+          				master_califa[0].SetMagThetaPhi(1.,hit_theta.at(0)*TMath::DegToRad(),hit_phi.at(0)*TMath::     DegToRad());
+          				maxE2 = hit_energy.at(1);
+          				master_califa[1].SetMagThetaPhi(1.,hit_theta.at(1)*TMath::DegToRad(),hit_phi.at(1)*TMath::     DegToRad());
+        			} 
 
 				//////////////////////////////
 				if(mul_cluster_califa>1){
