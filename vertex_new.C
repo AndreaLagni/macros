@@ -1859,7 +1859,7 @@ if(true){
 									int countg=0;
 									for(int a=0;a<dist_fc.size();a++){
 										if(abs(d_phi_fc_r.at(a))<6 && abs(d_phi_fc_l.at(a))<6 && abs(d_theta_fc_r.at(a))<4 && abs(d_theta_fc_l.at(a))<4 && abs(x_vm_t.at(a))<30 && abs(y_vm_t.at(a))<20 && dist_fc.at(a)<2){
-											i_min=a;
+											//i_min=a;
 											countg++;
 											//break;
 										}
