@@ -208,14 +208,14 @@ void vertex_new(){
 	timer.Start();
 	Hist();
 
-	TFile*in =  new TFile("../unpacked/140_mdf_new.root","READ");    	
+	TFile*in =  new TFile("../unpacked/140_mdf_e.root","READ");    	
 
 	if(in){std::cout<<"File Found" << std::endl;} 
 	if(!in){std::cout<<"File Not Found" << std::endl;} 
 	TTree*tree = (TTree*)in->Get("evt");
 	if(tree){std::cout<< "Tree Found"<<std::endl;}
 	if(!tree){std::cout<< "Tree Not Found"<<std::endl;}
-	int nevents = tree->GetEntries();
+	double nevents = tree->GetEntries();
 	std::cout << "Number Of Raw Events: "<< nevents << std::endl; 
 
 	R3BEventHeader*DataCA = new R3BEventHeader();
@@ -725,7 +725,7 @@ void vertex_new(){
 	bool t3 = false;
 	bool t4=false;
 	Int_t TPATn;
-	TFile*i =  new TFile("/feynman/home/dphn/lena/al268379/work/s522_analysis/vertex/PID_12C.root","READ");    	
+	TFile*i =  new TFile("/feynman/home/dphn/lena/al268379/work/s522_analysis/vertex/PID_12C_v_Enis.root","READ");    	
 	if(i){std::cout<<"File Found" << std::endl;} 
 	if(!i){std::cout<<"File Not Found" << std::endl;} 
 	TTree *vti = (TTree*)i->Get("pid");
@@ -737,7 +737,7 @@ void vertex_new(){
 	vti->SetBranchAddress("MDFTrack_Z",&mdf_z);
 
 	//New File definition
-	TFile *q = new TFile("Vertex__tot_140_new.root","RECREATE");
+	TFile *q = new TFile("Vertex_tot_140_new_e_t.root","RECREATE");
 	TTree *vertex = new TTree ("vertex","vertex"); 
 
 	vertex->Branch("FRS_Aq",&frs_aq);
@@ -848,17 +848,19 @@ void vertex_new(){
 
 	for(int i = 0; i<nevents ; i++){
 
-		vti->GetEntry(i);
+		//vti->GetEntry(i);
 		int nofrs=1;
-		if(i%1000==0){
-			std::clog << "Analysis Info    :   " << (i-i_init)*100/(nevents-i_init) << " % of events treated, " << count_v << " Good vertex found " << "\r";
-		}
+		//if(i%1000==0){
+		double per = i*100/nevents;
+		//cout<<per<<endl;	
+		std::clog << "Analysis Info    :   " << per << " % of events treated, " << count_v << " Good vertex found " << "\r";
+		//}
 
 		//if(mdf_aoz->size()>0 && mdf_z->size()>0){
-		//	if(nofrs==1  && mdf_z->at(0)>4.5 && mdf_z->at(0)<5.5 && mdf_aoz->at(0)>1.9 && mdf_aoz->at(0)<2.3){
+		//	if(nofrs==1  && mdf_z->at(0)>4.6 && mdf_z->at(0)<5.4 && mdf_aoz->at(0)>2.02 && mdf_aoz->at(0)<2.2){
 if(true){
 	if(true){
-				//cout<<"i-> "<<i<<endl;
+			//cout<<"i-> "<<i<<endl;
 				TPATn=TPAT;
 				p2pt_n=p2pt;
 				eventn.clear();
@@ -1293,11 +1295,11 @@ if(true){
 					double xmw1=-999;
 					double frsaq=-999;
 					double frsz=-999;
-					if(frs_z.size()>0 && frs_aq.size()>0){
-						frsz=frs_z.at(0);
-						frsaq=frs_aq.at(0);
+				//	if(frs_z.size()>0 && frs_aq.size()>0){
+				//		frsz=frs_z.at(0);
+				//		frsaq=frs_aq.at(0);
 
-					}			
+				//	}			
 
 
 					double Zmin = 1. , Zmax = 8. , AQmin = 1. , AQmax = 4. ;//all
@@ -1510,6 +1512,7 @@ if(true){
 						double phi_ra=-999.;
 						TVector3 pra,pla;
 
+										//cout<<"A"<<endl;
 						if(xt10.size()>0 && xt3.size()>0 && yt5.size()>0 && yt12.size()>0){
 							for(int i=0; i<xt10.size(); i++){
 								for(int j=0; j<xt3.size();j++){
@@ -1619,6 +1622,7 @@ if(true){
 							}
 						}
 
+										//cout<<"B"<<endl;
 						Mult_left_x = Count_left_x;
 						Mult_left_y = Count_left_y;
 						//vector multiplicity
@@ -1694,7 +1698,7 @@ if(true){
 
 
 						int dist_min_i=0;
-						if(Mult_left>0 && Mult_right>0){
+						if(Mult_left>0 && Mult_right>0 && Mult_left<60 && Mult_left<60){
 
 							if(theta_l > 0 && theta_r > 0){
 								for(Int_t p=0 ; p<Mult_right; p++){
@@ -1712,6 +1716,7 @@ if(true){
 										//if(theta_l > 0 && theta_r > 0){
 										MinDist(AX_right.at(p),BX_right.at(p),AY_right.at(p),BY_right.at(p),AX_left.at(q),BX_left.at(q),AY_left.at(q),BY_left.at(q),xv,yv,zv,dist);
 
+										//cout<<"C"<<endl;
 										TVector3 Vertext(xv,yv,zv);
 
 										z_vm_t.push_back(zv);
@@ -1789,13 +1794,14 @@ if(true){
 								}
 								combination = dist_fc.size();
 								//Sorting of the tracks combination for MinDist and  delta Angles	
+								if(dist_fc.size()<60){
 								for(int i =0; i<dist_fc.size()-1;i++){
 									for(int j =i+1; j<dist_fc.size();j++){
 										if(dist_fc.at(i) > dist_fc.at(j)){
 											//if(sum_t.at(i) > sum_t.at(j)){
-											double tempo = sum_t.at(i);
-											sum_t.at(i) = sum_t.at(j);
-											sum_t.at(j) = tempo;	
+											//double tempo = sum_t.at(i);
+											//sum_t.at(i) = sum_t.at(j);
+											//sum_t.at(j) = tempo;	
 
 											double temp = dist_fc.at(i);
 											dist_fc.at(i) = dist_fc.at(j);
@@ -1845,72 +1851,74 @@ if(true){
 											x_vm_t.at(i) = x_vm_t.at(j);
 											x_vm_t.at(j) = temp11;
 
-												double temp12 = y_vm_t.at(i);
-												y_vm_t.at(i) = y_vm_t.at(j);
-												y_vm_t.at(j) = temp12;
-
-												//}
-											}
+											double temp12 = y_vm_t.at(i);
+											y_vm_t.at(i) = y_vm_t.at(j);
+											y_vm_t.at(j) = temp12;
+										
+										//cout<<"D"<<endl;
+											//}
 										}
 									}
-
-									double t_d_m=999;
-									int i_min=-999;	
-									int countg=0;
-									for(int a=0;a<dist_fc.size();a++){
-										if(abs(d_phi_fc_r.at(a))<6 && abs(d_phi_fc_l.at(a))<6 && abs(d_theta_fc_r.at(a))<4 && abs(d_theta_fc_l.at(a))<4 && abs(x_vm_t.at(a))<30 && abs(y_vm_t.at(a))<20 && dist_fc.at(a)<2){
-											//i_min=a;
-											countg++;
-											//break;
-										}
+								}
+								}
+								double t_d_m=999;
+								int i_min=-999;	
+								int countg=0;
+								for(int a=0;a<dist_fc.size();a++){
+									if(abs(d_phi_fc_r.at(a))<10 && abs(d_phi_fc_l.at(a))<10 && abs(d_theta_fc_r.at(a))<5  && abs(d_theta_fc_l.at(a))<5 && abs(x_vm_t.at(a))<30 && abs(y_vm_t.at(a))<20 && dist_fc.at(a)<1){
+										//i_min=a;
+										//cout<<"E"<<endl;
+										countg++;
+										//break;
 									}
-									n_tracks.push_back(countg);
+								}
+								n_tracks.push_back(countg);
 
 
-									for(int a=0;a<dist_fc.size();a++){
-										if(abs(d_phi_fc_r.at(a))<4 && abs(d_phi_fc_l.at(a))<4 && abs(d_theta_fc_r.at(a))<4 && abs(d_theta_fc_l.at(a))<4 && abs(x_vm_t.at(a))<30 && abs(y_vm_t.at(a))<20 && dist_fc.at(a)<2 && theta_p_r_m_t.at(a)<80 && theta_p_l_m_t.at(a)<80){
-											i_min=a;
-											//countg++;
-											break;
-										}
+								for(int a=0;a<dist_fc.size();a++){
+									if(abs(d_phi_fc_r.at(a))<10 && abs(d_phi_fc_l.at(a))<10 && abs(d_theta_fc_r.at(a))<5 && abs(d_theta_fc_l.at(a))<5 && abs(x_vm_t.at(a))<30 && abs(y_vm_t.at(a))<20 && dist_fc.at(a)<1 && theta_p_r_m_t.at(a)<80 && theta_p_l_m_t.at(a)<80 && countg<60){
+										i_min=a;
+										count_v++;
+										//cout<<"F"<<endl;
+										//countg++;
+										break;
 									}
+								}
 
-									if(i_min>-1){
-										z_vm_tt.push_back(z_vm_t.at(i_min));
-										y_vm_tt.push_back(y_vm_t.at(i_min));
-										x_vm_tt.push_back(x_vm_t.at(i_min));
-										opa_f.push_back(opa_f_t.at(i_min));
+								if(i_min>-1){
+									z_vm_tt.push_back(z_vm_t.at(i_min));
+									y_vm_tt.push_back(y_vm_t.at(i_min));
+									x_vm_tt.push_back(x_vm_t.at(i_min));
+									opa_f.push_back(opa_f_t.at(i_min));
 
-										thetar_tt.push_back(theta_p_r_m_t.at(i_min));
-										thetal_tt.push_back(theta_p_l_m_t.at(i_min));
-										phir_tt.push_back(phi_p_r_m_t.at(i_min));
-										phil_tt.push_back(phi_p_l_m_t.at(i_min));
+									thetar_tt.push_back(theta_p_r_m_t.at(i_min));
+									thetal_tt.push_back(theta_p_l_m_t.at(i_min));
+									phir_tt.push_back(phi_p_r_m_t.at(i_min));
+									phil_tt.push_back(phi_p_l_m_t.at(i_min));
 
-									count_v++;
-									}
-							}
+								}
+						}
 						}
 					} //if left and right
-				} //califa
+					} //califa
+					vertex->Fill();
+					}//TPAT
+				}
+			}//pid	
+			vertex->Write();
+			q->Close();
+			Double_t rtime = timer.RealTime();
+			Double_t ctime = timer.CpuTime();
+			Float_t cpuUsage = ctime / rtime;
+			//cout << "CPU used: " << cpuUsage << endl;
+			cout << endl;
+			cout << "Real time " << rtime/60 << " min, CPU time " << ctime/60 <<"min" << endl << endl;
+			cout << "Macro finished successfully." << endl;
+			cout << "Number of vertex found is--> " << count_v << endl;
+			cout << "Percentage of vertex found is--> " << (count_v/nevents)*100 << endl;
+			//cout << "s522 16C without correction => p2p true + TCutG" << endl;
 
-				vertex->Fill();
-			}//TPAT
-		}
-	}//pid	
-	vertex->Write();
-	q->Close();
-	Double_t rtime = timer.RealTime();
-	Double_t ctime = timer.CpuTime();
-	Float_t cpuUsage = ctime / rtime;
-	//cout << "CPU used: " << cpuUsage << endl;
-	cout << endl;
-	cout << "Real time " << rtime/60 << " min, CPU time " << ctime/60 <<"min" << endl << endl;
-	cout << "Macro finished successfully." << endl;
-	cout << "Number of vertex found is--> " << count_v << endl;
-	cout << "Percentage of vertex found is--> " << (count_v/nevents)*100 << endl;
-	//cout << "s522 16C without correction => p2p true + TCutG" << endl;
-
-}
+			}
 
 
 
