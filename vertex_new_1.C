@@ -202,7 +202,7 @@ void MinDist(double ax_right, double bx_right, double ay_right, double by_right,
 }
 //=====================================================================================================================================================//
 //Main()
-void vertex_new(){
+void vertex_new_1(){
 
 	TStopwatch timer;
 	timer.Start();
